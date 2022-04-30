@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import shutil
+import json
+import subprocess
+from time import strftime,localtime
+from zipfile import ZipFile
+
+def get_all_file_paths(directory):
+    file_paths = []
+    for root, _, files in os.walk(directory):
+        for filename in files:
+            filepath = os.path.join(root, filename)
+            file_paths.append(filepath)
+    return file_paths        
+
+def get_files_in_dir(d):
+    res = []
+    for f in os.listdir(d):
+        if os.path.isfile(os.path.join(d, f)):
+            res.append(d + "/" + f)
+        if os.path.isdir(os.path.join(d, f)):
+            res += get_files_in_dir(os.path.join(d, f))
+    return res
+
+def get_files(folder):
+    dlls = os.listdir(os.path.join(folder, "dlls"))
+    share = get_files_in_dir(os.path.join(folder, "share"))
+    return ["plugins/" + i for i in dlls] + share
+
+
+def main():
+    if len(sys.argv) <= 1:
+        print("no arguments passed")
+        sys.exit(1)
+    folder = os.path.join(os.getcwd(), sys.argv[1])
+    manifest_file = os.path.join(folder, "manifest.apkg.json")
+    if not os.path.isfile(manifest_file):
+        print("manifest file does not exist")
+        sys.exit(1)
+    with open(manifest_file) as f:
+        manifest = json.load(f)
+    print(f"Building {manifest['packageName']} from {manifest['project']['maintainer']}...")
+    print(f"1. Running build script...")
+    os.chdir(folder)
+    res = subprocess.call([manifest["build"]["command"]] + manifest["build"]["args"])
+    if res != 0:
+        print("build script failed")
+        sys.exit(1)
+    print("2. Creating build folder...")
+    build_folder = "/tmp/apkg-build"
+    if os.path.exists(build_folder):
+        shutil.rmtree(build_folder)
+    os.makedirs(build_folder)
+    print("3. Populating build folder with dlls...")
+    os.makedirs(os.path.join(build_folder, "dlls"))
+    for index, dll in enumerate(manifest["build"]["dlls"]):
+        print(f"3.{index}. {dll}...")
+        shutil.copyfile(
+            os.path.join(folder, "bin", "Debug", "net6.0", dll),
+            os.path.join(build_folder, "dlls", dll)
+            )
+    print("4. Copying share files to build folder...")
+    shutil.copytree(
+        os.path.join(folder, manifest["build"]["share"]),
+        os.path.join(build_folder, "share")
+        )
+    print("5. Generating PKGINFO...")
+    pkginfo = {
+        "packageName": manifest["packageName"],
+        "packageVersion": strftime("%Y.%m.%d", localtime()),
+        "files": get_files(build_folder),
+        "project": manifest["project"]
+        }
+    with open(os.path.join(build_folder, "PKGINFO.json"), "w") as f:
+        json.dump(pkginfo, f)
+    print("6. Exporting .lcpkg file...")
+    os.chdir(build_folder)
+    file_paths = get_all_file_paths(".")
+    with ZipFile(os.path.join(f"/tmp/{manifest['packageName']}.lcpkg"),"w") as zip:
+        for file in file_paths:
+            zip.write(file)
+    print("Done.")
+
+if __name__ == "__main__":
+    main()
+
