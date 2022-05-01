@@ -9,7 +9,6 @@
 # 
 # build package archives for LeoConsole
 
-from time import strftime,localtime
 from zipfile import ZipFile
 import json
 import os
@@ -84,7 +83,7 @@ def gen_pkginfo(build_folder, manifest):
     print("5. Generating PKGINFO...")
     pkginfo = {
         "packageName": manifest["packageName"],
-        "packageVersion": strftime("%Y.%m.%d", localtime()),
+        "packageVersion": manifest["packageVersion"],
         "files": get_files(build_folder),
         "project": manifest["project"]
         }
