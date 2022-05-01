@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
+#        _                        _            ___  _  _   
+#   __ _| | _____  _____ ___   __| | ___ _ __ / _ \| || |  
+#  / _` | |/ _ \ \/ / __/ _ \ / _` |/ _ \ '__| | | | || |_ 
+# | (_| | |  __/>  < (_| (_) | (_| |  __/ |  | |_| |__   _|
+#  \__,_|_|\___/_/\_\___\___/ \__,_|\___|_|   \___/   |_|  
+# 
+# Copyright (c) 2022 alexcoder04 <https://github.com/alexcoder04>
+# 
+# build package archives for LeoConsole
 
-import os
-import sys
-import shutil
-import json
-import subprocess
 from time import strftime,localtime
 from zipfile import ZipFile
+import json
+import os
+import shutil
+import subprocess
+import sys
 
 def get_all_file_paths(directory):
     file_paths = []
@@ -26,17 +35,16 @@ def get_files_in_dir(d):
     return res
 
 def get_files(folder):
-    dlls = os.listdir(os.path.join(folder, "dlls"))
-    share = get_files_in_dir(os.path.join(folder, "share"))
+    dlls = os.listdir(os.path.join(folder, "plugins"))
+    share = [
+        i[(len(folder)+1):] for i in get_files_in_dir(os.path.join(folder, "share"))
+        ]
     return ["plugins/" + i for i in dlls] + share
 
-
-def main():
-    if len(sys.argv) <= 1:
-        print("no arguments passed")
-        sys.exit(1)
-    folder = os.path.join(os.getcwd(), sys.argv[1])
-    manifest_file = os.path.join(folder, "manifest.apkg.json")
+def compile_project(folder):
+    pwd_pre = os.getcwd()
+    os.chdir(folder)
+    manifest_file = "manifest.apkg.json"
     if not os.path.isfile(manifest_file):
         print("manifest file does not exist")
         sys.exit(1)
@@ -44,29 +52,35 @@ def main():
         manifest = json.load(f)
     print(f"Building {manifest['packageName']} from {manifest['project']['maintainer']}...")
     print(f"1. Running build script...")
-    os.chdir(folder)
     res = subprocess.call([manifest["build"]["command"]] + manifest["build"]["args"])
     if res != 0:
         print("build script failed")
         sys.exit(1)
+    os.chdir(pwd_pre)
+    return manifest
+
+
+def prepare_package(folder, build_folder, manifest):
     print("2. Creating build folder...")
-    build_folder = "/tmp/apkg-build"
     if os.path.exists(build_folder):
         shutil.rmtree(build_folder)
     os.makedirs(build_folder)
     print("3. Populating build folder with dlls...")
-    os.makedirs(os.path.join(build_folder, "dlls"))
+    os.makedirs(os.path.join(build_folder, "plugins"))
     for index, dll in enumerate(manifest["build"]["dlls"]):
-        print(f"3.{index}. {dll}...")
+        print(f"3.{index+1}. {dll}...")
         shutil.copyfile(
             os.path.join(folder, "bin", "Debug", "net6.0", dll),
-            os.path.join(build_folder, "dlls", dll)
+            os.path.join(build_folder, "plugins", dll)
             )
     print("4. Copying share files to build folder...")
     shutil.copytree(
         os.path.join(folder, manifest["build"]["share"]),
         os.path.join(build_folder, "share")
         )
+
+
+def gen_pkginfo(build_folder, manifest):
     print("5. Generating PKGINFO...")
     pkginfo = {
         "packageName": manifest["packageName"],
@@ -76,12 +90,32 @@ def main():
         }
     with open(os.path.join(build_folder, "PKGINFO.json"), "w") as f:
         json.dump(pkginfo, f)
+
+
+def compress(build_folder, folder, manifest):
     print("6. Exporting .lcpkg file...")
+    pwd_pre = os.getcwd()
     os.chdir(build_folder)
     file_paths = get_all_file_paths(".")
-    with ZipFile(os.path.join(f"/tmp/{manifest['packageName']}.lcpkg"),"w") as zip:
+    with ZipFile(os.path.join(folder, f"{manifest['packageName']}.lcpkg"),"w") as zip:
         for file in file_paths:
             zip.write(file)
+    os.chdir(pwd_pre)
+
+
+def main():
+    if len(sys.argv) <= 1:
+        print("no arguments passed")
+        sys.exit(1)
+
+    folder = os.path.join(os.getcwd(), sys.argv[1])
+
+    manifest = compile_project(folder)
+    build_folder = "/tmp/apkg-build"
+    prepare_package(folder, build_folder, manifest)
+    gen_pkginfo(build_folder, manifest)
+    compress(build_folder, folder, manifest)
+
     print("Done.")
 
 if __name__ == "__main__":
