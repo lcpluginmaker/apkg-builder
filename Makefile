@@ -1,7 +1,7 @@
 
 BUILD_FOLDER = build
 LINUX_OUT = $(BUILD_FOLDER)/apkg-build-lin64
-WINDOWS_OUT = $(BUILD_FOLDER)/apkg-build-win64
+WINDOWS_OUT = $(BUILD_FOLDER)/apkg-build-win64.exe
 
 all: linux windows
 
