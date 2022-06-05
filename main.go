@@ -83,11 +83,20 @@ func PreparePackage(folder string, buildFolder string, manifest Manifest) {
 	}
 }
 
+func GetPackageOS() string {
+	if os.Getenv("APKG_BUILDER_OS") == "" {
+		return "lnx64"
+	}
+	return os.Getenv("APKG_BUILDER_OS")
+}
+
 func GenPkgInfo(buildFolder string, manifest Manifest) {
 	log.Println("5. Generating PKGINFO...")
 	pkginfo := PKGINFO{}
+	pkginfo.ManifestVersion = 1.1
 	pkginfo.PackageName = manifest.PackageName
 	pkginfo.PackageVersion = manifest.PackageVersion
+	pkginfo.PackageOS = GetPackageOS()
 	pkginfo.Files = GetFilesList(buildFolder)
 	pkginfo.Project = manifest.Project
 

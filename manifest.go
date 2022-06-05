@@ -24,8 +24,10 @@ type Manifest struct {
 }
 
 type PKGINFO struct {
-	PackageName    string          `json:"packageName"`
-	PackageVersion string          `json:"packageVersion"`
-	Files          []string        `json:"files"`
-	Project        ManifestProject `json:"project"`
+	ManifestVersion float64         `json:"manifestVersion"`
+	PackageName     string          `json:"packageName"`
+	PackageVersion  string          `json:"packageVersion"`
+	PackageOS       string          `json:"packageOS"`
+	Files           []string        `json:"files"`
+	Project         ManifestProject `json:"project"`
 }
