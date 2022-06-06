@@ -4,20 +4,23 @@ import (
 	"archive/zip"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/alexcoder04/arrowprint"
 )
 
 func CopyFile(source string, destin string) {
 	bytesRead, err := ioutil.ReadFile(source)
 	if err != nil {
-		log.Fatal(err)
+		arrowprint.Err0(err.Error())
+		os.Exit(1)
 	}
 
 	err = ioutil.WriteFile(destin, bytesRead, 0600)
 	if err != nil {
-		log.Fatal(err)
+		arrowprint.Err0(err.Error())
+		os.Exit(1)
 	}
 }
 
@@ -29,7 +32,8 @@ func GetFilesList(folder string) []string {
 		}
 		stat, err := os.Stat(p)
 		if err != nil {
-			log.Fatalln("cannot stat file")
+			arrowprint.Err0("cannot stat file")
+			os.Exit(1)
 		}
 		if !stat.IsDir() {
 			filesList = append(filesList, p[len(folder)+1:])
@@ -37,16 +41,18 @@ func GetFilesList(folder string) []string {
 		return nil
 	})
 	if err != nil {
-		log.Fatalln("cannot list files")
+		arrowprint.Err0("cannot list files")
+		os.Exit(1)
 	}
 	return filesList
 }
 
 func Compress(folder string, destin string) {
-	log.Printf("6. Compressing %s...\n", folder)
+	arrowprint.Suc1("6. Compressing %s...", folder)
 	file, err := os.Create(destin)
 	if err != nil {
-		log.Fatalln("cannot create output file")
+		arrowprint.Err0("cannot create output file")
+		os.Exit(1)
 	}
 	defer file.Close()
 
@@ -54,7 +60,7 @@ func Compress(folder string, destin string) {
 	defer w.Close()
 
 	walker := func(path string, info os.FileInfo, err error) error {
-		log.Printf("adding: %#v\n", path)
+		arrowprint.Info1("adding: %#v", path)
 		if err != nil {
 			return err
 		}
@@ -81,6 +87,7 @@ func Compress(folder string, destin string) {
 	}
 	err = filepath.Walk(folder, walker)
 	if err != nil {
-		log.Fatalln("cannot compress folder")
+		arrowprint.Err0("cannot compress folder")
+		os.Exit(1)
 	}
 }
