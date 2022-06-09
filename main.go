@@ -129,9 +129,13 @@ func main() {
 		os.Exit(1)
 		break
 	case 1:
-		folder = os.Args[1]
+		arrowprint.Err0("no arguments passed")
+		os.Exit(1)
 		break
 	case 2:
+		folder = os.Args[1]
+		break
+	case 3:
 		// Args[1] is IData
 		folder = os.Args[2]
 	}
