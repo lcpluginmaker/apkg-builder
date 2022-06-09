@@ -1,13 +1,3 @@
-github.com/alexcoder04/arrowprint v0.0.0-20220606112223-08cbec201dc6 h1:yWowx3tIVyQ6LeLJ42jARzf5Lrr6gLgKINoBAxfCWI0=
-github.com/alexcoder04/arrowprint v0.0.0-20220606112223-08cbec201dc6/go.mod h1:1GUCo1q7Dv+Ls1a+ibn9pLu2bBAN2O1OpO1uMgs006g=
-github.com/alexcoder04/arrowprint v0.0.0-20220606113837-77d577336e0d h1:8eUC/WHbSzFjSvU+wOTknxP5IJb1IThC4S+3BMSrRdU=
-github.com/alexcoder04/arrowprint v0.0.0-20220606113837-77d577336e0d/go.mod h1:1GUCo1q7Dv+Ls1a+ibn9pLu2bBAN2O1OpO1uMgs006g=
-github.com/alexcoder04/arrowprint v0.0.0-20220606115441-e8f66ded3253 h1:0Zt59dHRT/sqEHZdGlHPd8JcbWQNptZ/bMMS4/Z5jFk=
-github.com/alexcoder04/arrowprint v0.0.0-20220606115441-e8f66ded3253/go.mod h1:1GUCo1q7Dv+Ls1a+ibn9pLu2bBAN2O1OpO1uMgs006g=
-github.com/alexcoder04/arrowprint v0.0.0-20220606115937-71f616ee61b5 h1:Dm0H1YTIKLo0Ci7dshzHIpN4XyBL+4ES5jYJnMgmusk=
-github.com/alexcoder04/arrowprint v0.0.0-20220606115937-71f616ee61b5/go.mod h1:1GUCo1q7Dv+Ls1a+ibn9pLu2bBAN2O1OpO1uMgs006g=
-github.com/alexcoder04/arrowprint v0.0.0-20220606120407-1ff6e8e68c09 h1:ayRGAAY8GfuP/1+8GUzPmTUIrSmxXohKiHEh/gFwJp4=
-github.com/alexcoder04/arrowprint v0.0.0-20220606120407-1ff6e8e68c09/go.mod h1:1GUCo1q7Dv+Ls1a+ibn9pLu2bBAN2O1OpO1uMgs006g=
 github.com/alexcoder04/arrowprint v0.0.1 h1:JOGDAmow9n1lZJkHFt3qP7vfqKZpmaeifPd9J+eHRac=
 github.com/alexcoder04/arrowprint v0.0.1/go.mod h1:vscFtiqe8wW9Bd3Gwl5u224YiBUWGL+x2prgtaoDB/U=
 github.com/mattn/go-colorable v0.1.12 h1:jF+Du6AlPIjs2BiUiQlKOX0rt3SujHxPnksPKZbaA40=
