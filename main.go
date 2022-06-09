@@ -15,7 +15,7 @@ import (
 )
 
 func LoadManifest(folder string) Manifest {
-	manifestFile := path.Join(folder, "manifest.apkg.json")
+	manifestFile := path.Join(folder, "manifest.json")
 	_, err := os.Stat(manifestFile)
 	if err != nil {
 		arrowprint.Err0("manifest file not found")
@@ -150,7 +150,7 @@ func main() {
 	Compile(folder, manifest)
 	PreparePackage(folder, buildFolder, manifest)
 	GenPkgInfo(buildFolder, manifest)
-	outputFile := path.Join(folder, manifest.PackageName+".lcpkg")
+	outputFile := path.Join(folder, manifest.PackageName+".lcp")
 	Compress(buildFolder, outputFile)
 
 	arrowprint.Suc0("Done. Package archive saved to %s.", outputFile)
