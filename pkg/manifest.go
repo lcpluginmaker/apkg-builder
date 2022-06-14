@@ -1,4 +1,4 @@
-package main
+package pkg
 
 type ManifestBuild struct {
 	Command string   `json:"command"`
