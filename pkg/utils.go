@@ -48,7 +48,7 @@ func GetFilesList(folder string) []string {
 }
 
 func Compress(folder string, destin string) {
-	arrowprint.Suc1("6. Compressing %s...", folder)
+	arrowprint.Suc0("6. Compressing %s...", folder)
 	file, err := os.Create(destin)
 	if err != nil {
 		arrowprint.Err0("cannot create output file")
