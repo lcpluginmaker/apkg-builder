@@ -6,14 +6,11 @@ This program builds package archives for
 code repositories.
 
 *You can use it as a standalone program, but it is already integrated in the
-apkg plugin.*
+[apkg](https://github.com/alexcoder04/LeoConsole-apkg) plugin.*
 
 ## Usage
 
 ```sh
-apkg-builder [IData] <folder>
+apkg-builder <folder>
 ```
-
-(`IData` is passed by LeoConsole, you don't need it, if you call apkg-builder
-from your shell)
 
