@@ -105,6 +105,8 @@ func GenPkgInfo(buildFolder string, manifest Manifest) {
 	pkginfo.PackageName = manifest.PackageName
 	pkginfo.PackageVersion = manifest.PackageVersion
 	pkginfo.PackageOS = GetPackageOS()
+	pkginfo.CompatibleVersions = manifest.CompatibleVersions
+	pkginfo.Depends = manifest.Depends
 	pkginfo.Files = GetFilesList(buildFolder)
 	pkginfo.Project = manifest.Project
 

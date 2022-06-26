@@ -16,18 +16,22 @@ type ManifestProject struct {
 }
 
 type Manifest struct {
-	ManifestVersion float64         `json:"manifestVersion"`
-	PackageName     string          `json:"packageName"`
-	PackageVersion  string          `json:"packageVersion"`
-	Build           ManifestBuild   `json:"build"`
-	Project         ManifestProject `json:"project"`
+	ManifestVersion    float64         `json:"manifestVersion"`
+	PackageName        string          `json:"packageName"`
+	PackageVersion     string          `json:"packageVersion"`
+	Depends            []string        `json:"depends"`
+	CompatibleVersions []string        `json:"compatibleVersions"`
+	Build              ManifestBuild   `json:"build"`
+	Project            ManifestProject `json:"project"`
 }
 
 type PKGINFO struct {
-	ManifestVersion float64         `json:"manifestVersion"`
-	PackageName     string          `json:"packageName"`
-	PackageVersion  string          `json:"packageVersion"`
-	PackageOS       string          `json:"packageOS"`
-	Files           []string        `json:"files"`
-	Project         ManifestProject `json:"project"`
+	ManifestVersion    float64         `json:"manifestVersion"`
+	PackageName        string          `json:"packageName"`
+	PackageVersion     string          `json:"packageVersion"`
+	PackageOS          string          `json:"packageOS"`
+	CompatibleVersions []string        `json:"compatibleVersions"`
+	Depends            []string        `json:"depends"`
+	Files              []string        `json:"files"`
+	Project            ManifestProject `json:"project"`
 }
