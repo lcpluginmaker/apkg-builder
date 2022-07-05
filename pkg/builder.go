@@ -3,6 +3,7 @@ package pkg
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -89,6 +90,39 @@ func PreparePackage(folder string, buildFolder string, manifest Manifest) {
 		arrowprint.Err0("cannot copy shared files")
 		os.Exit(1)
 	}
+	err = copyLicense(folder, buildFolder, manifest.PackageName)
+	if err != nil {
+		arrowprint.Err0("error installing license")
+		os.Exit(1)
+	}
+}
+
+func copyLicense(folder string, buildFolder string, pkgname string) error {
+	for _, f := range []string{"LICENSE", "LICENSE.txt", "LICENSE.md"} {
+		stat, err := os.Stat(path.Join(folder, f))
+		if err != nil || stat.IsDir() {
+			continue
+		}
+		arrowprint.Suc0("5. Copying license to build folder...")
+		docsFolder := path.Join(buildFolder, "share", "docs", pkgname)
+		stat, err = os.Stat(docsFolder)
+		if err != nil {
+			if os.IsNotExist(err) {
+				err := os.MkdirAll(docsFolder, 0700)
+				if err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+		if !stat.IsDir() {
+			return errors.New("docs folder exists, but is not a folder")
+		}
+		CopyFile(path.Join(folder, f), path.Join(docsFolder, "LICENSE"))
+		break
+	}
+	return nil
 }
 
 func GetPackageOS() string {
