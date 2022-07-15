@@ -112,6 +112,10 @@ func copyLicense(folder string, buildFolder string, pkgname string) error {
 				if err != nil {
 					return err
 				}
+				stat, err = os.Stat(docsFolder)
+				if err != nil {
+					return errors.New("docs folder created, but cannot stat it again")
+				}
 			} else {
 				return err
 			}
