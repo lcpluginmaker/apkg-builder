@@ -75,7 +75,12 @@ func Compile(folder string, manifest Manifest) {
 	if manifest.ManifestVersion >= 4.0 {
 		arrowprint.Suc0("Creating folders requested by package")
 		for _, f := range manifest.Build.Folders {
-			err := os.MkdirAll(path.Join(folder, f), 0700)
+			err := os.RemoveAll(path.Join(folder, f))
+			if err != nil {
+				arrowprint.Err0("cannot remove %s", f)
+				os.Exit(1)
+			}
+			err = os.MkdirAll(path.Join(folder, f), 0700)
 			if err != nil {
 				arrowprint.Err0("cannot create %s", f)
 				os.Exit(1)
