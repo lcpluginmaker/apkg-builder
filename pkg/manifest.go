@@ -1,11 +1,13 @@
 package pkg
 
 type ManifestBuild struct {
-	Command string   `json:"command"`
-	Args    []string `json:"args"`
-	Folder  string   `json:"folder"`
-	Dlls    []string `json:"dlls"`
-	Share   string   `json:"share"`
+	Folders   []string            `json:"folders"`
+	Downloads []map[string]string `json:"downloads"`
+	Command   string              `json:"command"`
+	Args      []string            `json:"args"`
+	Folder    string              `json:"folder"`
+	Dlls      []string            `json:"dlls"`
+	Share     string              `json:"share"`
 }
 
 type ManifestProject struct {

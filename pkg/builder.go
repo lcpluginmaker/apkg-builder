@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -36,12 +38,77 @@ func LoadManifest(folder string) Manifest {
 	return manifest
 }
 
+func DownloadFile(_url string, dest string) error {
+	_, err := url.Parse(_url)
+	if err != nil {
+		return err
+	}
+	f, err := os.Create(dest)
+	if err != nil {
+		return err
+	}
+	client := http.Client{
+		CheckRedirect: func(r *http.Request, via []*http.Request) error {
+			r.URL.Opaque = r.URL.Path
+			return nil
+		}}
+	resp, err := client.Get(_url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	_, err = io.Copy(f, resp.Body)
+	defer f.Close()
+
+	arrowprint.Suc1("downloaded %s to %s", _url, dest)
+
+	return nil
+}
+
 func Compile(folder string, manifest Manifest) {
 	arrowprint.InfoC(
 		"Building %s from %s",
 		manifest.PackageName,
 		manifest.Project.Maintainer)
-	arrowprint.Suc0("1. Running build script...")
+
+	if manifest.ManifestVersion >= 4.0 {
+		arrowprint.Suc0("Creating folders requested by package")
+		for _, f := range manifest.Build.Folders {
+			err := os.MkdirAll(path.Join(folder, f), 0700)
+			if err != nil {
+				arrowprint.Err0("cannot create %s", f)
+				os.Exit(1)
+			}
+			arrowprint.Suc1("created %s", f)
+		}
+		arrowprint.Suc0("Downloading additional files")
+		for _, item := range manifest.Build.Downloads {
+			url, ok := item["url"]
+			if !ok {
+				url, ok = item["url:"+GetPackageOS()]
+				if !ok {
+					arrowprint.Err0("Download url not available")
+					os.Exit(1)
+				}
+			}
+			p, ok := item["path"]
+			if !ok {
+				p, ok = item["path:"+GetPackageOS()]
+				if !ok {
+					arrowprint.Err0("Download path not available")
+					os.Exit(1)
+				}
+			}
+
+			err := DownloadFile(url, path.Join(folder, p))
+			if err != nil {
+				arrowprint.Err0("error downloading file: %s", err.Error())
+			}
+		}
+	}
+
+	arrowprint.Suc0("Running build script...")
 	cmd := exec.Command(manifest.Build.Command, manifest.Build.Args...)
 	cmd.Dir = folder
 
@@ -60,7 +127,7 @@ func Compile(folder string, manifest Manifest) {
 }
 
 func PreparePackage(folder string, buildFolder string, manifest Manifest) {
-	arrowprint.Suc0("2. Creating build folder...")
+	arrowprint.Suc0("Creating build folder...")
 	_, err := os.Stat(buildFolder)
 	if err != nil {
 		if !os.IsNotExist(err) {
@@ -70,19 +137,19 @@ func PreparePackage(folder string, buildFolder string, manifest Manifest) {
 	} else {
 		os.RemoveAll(buildFolder)
 	}
-	arrowprint.Suc0("3. Populating build folder with dlls...")
+	arrowprint.Suc0("Populating build folder with dlls...")
 	err = os.MkdirAll(path.Join(buildFolder, "plugins"), 0700)
 	if err != nil {
 		arrowprint.Err0("error creating build folder")
 		os.Exit(1)
 	}
 	for i, d := range manifest.Build.Dlls {
-		arrowprint.Info1("3.%d. %s...", i+1, d)
+		arrowprint.Info1("%d. %s...", i+1, d)
 		CopyFile(
 			path.Join(folder, "bin", "Debug", "net6.0", d),
 			path.Join(buildFolder, "plugins", d))
 	}
-	arrowprint.Suc0("4. Copying share files to build folder...")
+	arrowprint.Suc0("Copying share files to build folder...")
 	err = cp.Copy(
 		path.Join(folder, manifest.Build.Share),
 		path.Join(buildFolder, "share"))
@@ -103,7 +170,7 @@ func copyLicense(folder string, buildFolder string, pkgname string) error {
 		if err != nil || stat.IsDir() {
 			continue
 		}
-		arrowprint.Suc0("5. Copying license to build folder...")
+		arrowprint.Suc0("Copying license to build folder...")
 		docsFolder := path.Join(buildFolder, "share", "docs", pkgname)
 		stat, err = os.Stat(docsFolder)
 		if err != nil {
@@ -137,7 +204,7 @@ func GetPackageOS() string {
 }
 
 func GenPkgInfo(buildFolder string, manifest Manifest) {
-	arrowprint.Suc0("5. Generating PKGINFO...")
+	arrowprint.Suc0("Generating PKGINFO...")
 	pkginfo := PKGINFO{}
 	pkginfo.ManifestVersion = 1.1
 	pkginfo.PackageName = manifest.PackageName
