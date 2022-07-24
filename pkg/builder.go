@@ -7,14 +7,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"path"
 
 	"github.com/alexcoder04/arrowprint"
-	cp "github.com/otiai10/copy"
+	"github.com/alexcoder04/friendly"
 )
 
 func LoadManifest(folder string) Manifest {
@@ -36,34 +34,6 @@ func LoadManifest(folder string) Manifest {
 		os.Exit(1)
 	}
 	return manifest
-}
-
-func DownloadFile(_url string, dest string) error {
-	_, err := url.Parse(_url)
-	if err != nil {
-		return err
-	}
-	f, err := os.Create(dest)
-	if err != nil {
-		return err
-	}
-	client := http.Client{
-		CheckRedirect: func(r *http.Request, via []*http.Request) error {
-			r.URL.Opaque = r.URL.Path
-			return nil
-		}}
-	resp, err := client.Get(_url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	_, err = io.Copy(f, resp.Body)
-	defer f.Close()
-
-	arrowprint.Suc1("downloaded %s to %s", _url, dest)
-
-	return nil
 }
 
 func Compile(folder string, manifest Manifest) {
@@ -106,7 +76,7 @@ func Compile(folder string, manifest Manifest) {
 				}
 			}
 
-			err := DownloadFile(url, path.Join(folder, p))
+			err := friendly.DownloadFile(url, path.Join(folder, p))
 			if err != nil {
 				arrowprint.Err0("error downloading file: %s", err.Error())
 			}
@@ -150,12 +120,12 @@ func PreparePackage(folder string, buildFolder string, manifest Manifest) {
 	}
 	for i, d := range manifest.Build.Dlls {
 		arrowprint.Info1("%d. %s...", i+1, d)
-		CopyFile(
+		friendly.CopyFile(
 			path.Join(folder, "bin", "Debug", "net6.0", d),
 			path.Join(buildFolder, "plugins", d))
 	}
 	arrowprint.Suc0("Copying share files to build folder...")
-	err = cp.Copy(
+	err = friendly.CopyFolder(
 		path.Join(folder, manifest.Build.Share),
 		path.Join(buildFolder, "share"))
 	if err != nil {
@@ -195,17 +165,10 @@ func copyLicense(folder string, buildFolder string, pkgname string) error {
 		if !stat.IsDir() {
 			return errors.New("docs folder exists, but is not a folder")
 		}
-		CopyFile(path.Join(folder, f), path.Join(docsFolder, "LICENSE"))
+		friendly.CopyFile(path.Join(folder, f), path.Join(docsFolder, "LICENSE"))
 		break
 	}
 	return nil
-}
-
-func GetPackageOS() string {
-	if os.Getenv("APKG_BUILDER_OS") == "" {
-		return "lnx64"
-	}
-	return os.Getenv("APKG_BUILDER_OS")
 }
 
 func GenPkgInfo(buildFolder string, manifest Manifest) {

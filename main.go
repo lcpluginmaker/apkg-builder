@@ -6,6 +6,7 @@ import (
 
 	"github.com/alexcoder04/LeoConsole-apkg-builder/pkg"
 	"github.com/alexcoder04/arrowprint"
+	"github.com/alexcoder04/friendly"
 )
 
 func main() {
@@ -31,7 +32,7 @@ func main() {
 	pkg.PreparePackage(folder, buildFolder, manifest)
 	pkg.GenPkgInfo(buildFolder, manifest)
 	outputFile := path.Join(folder, manifest.PackageName+".lcp")
-	pkg.Compress(buildFolder, outputFile)
+	friendly.CompressFolder(buildFolder, outputFile)
 
 	arrowprint.Suc0("Done. Package archive saved to %s.", outputFile)
 }
