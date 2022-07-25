@@ -1,7 +1,7 @@
 package pkg
 
 type ManifestBuild struct {
-	Folders   []string            `json:"folders"`
+	Folders   []string            `json:"create"`
 	Downloads []map[string]string `json:"downloads"`
 	Command   string              `json:"command"`
 	Args      []string            `json:"args"`
