@@ -45,14 +45,9 @@ func Compile(folder string, manifest Manifest) {
 	if manifest.ManifestVersion >= 4.0 {
 		arrowprint.Suc0("Creating folders requested by package")
 		for _, f := range manifest.Build.Folders {
-			err := os.RemoveAll(path.Join(folder, f))
+			err := RecreateFolder(path.Join(folder, f))
 			if err != nil {
-				arrowprint.Err0("cannot remove %s", f)
-				os.Exit(1)
-			}
-			err = os.MkdirAll(path.Join(folder, f), 0700)
-			if err != nil {
-				arrowprint.Err0("cannot create %s", f)
+				arrowprint.Err0("Failed to create %s: %s", f, err)
 				os.Exit(1)
 			}
 			arrowprint.Suc1("created %s", f)
@@ -180,7 +175,12 @@ func GenPkgInfo(buildFolder string, manifest Manifest) {
 	pkginfo.PackageOS = GetPackageOS()
 	pkginfo.CompatibleVersions = manifest.CompatibleVersions
 	pkginfo.Depends = manifest.Depends
-	pkginfo.Files = GetFilesList(buildFolder)
+	files, err := friendly.ListFilesRecursively(buildFolder)
+	if err != nil {
+		arrowprint.Err0("cannot files files in build folder")
+		os.Exit(1)
+	}
+	pkginfo.Files = files
 	pkginfo.Project = manifest.Project
 
 	res, err := json.Marshal(pkginfo)
