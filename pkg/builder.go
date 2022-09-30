@@ -1,14 +1,10 @@
 package pkg
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path"
 
 	"github.com/alexcoder04/arrowprint"
@@ -79,21 +75,11 @@ func Compile(folder string, manifest Manifest) {
 	}
 
 	arrowprint.Suc0("Running build script...")
-	cmd := exec.Command(manifest.Build.Command, manifest.Build.Args...)
-	cmd.Dir = folder
-
-	var stdBuffer bytes.Buffer
-	mw := io.MultiWriter(os.Stdout, &stdBuffer)
-
-	cmd.Stdout = mw
-	cmd.Stderr = mw
-
-	err := cmd.Run()
+	err := friendly.Run(manifest.Build.Command, manifest.Build.Args, folder)
 	if err != nil {
 		arrowprint.Err0("build script failed")
 		os.Exit(1)
 	}
-	fmt.Println(stdBuffer.String())
 }
 
 func PreparePackage(folder string, buildFolder string, manifest Manifest) {
