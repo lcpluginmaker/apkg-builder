@@ -6,7 +6,7 @@ import (
 
 	"github.com/alexcoder04/LeoConsole-apkg-builder/pkg"
 	"github.com/alexcoder04/arrowprint"
-	"github.com/alexcoder04/friendly"
+	"github.com/alexcoder04/friendly/v2"
 )
 
 func main() {

@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/alexcoder04/arrowprint v0.0.1
-	github.com/alexcoder04/friendly v0.3.1
+	github.com/alexcoder04/friendly/v2 v2.0.0
 )
 
 require (

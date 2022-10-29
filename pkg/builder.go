@@ -8,7 +8,8 @@ import (
 	"path"
 
 	"github.com/alexcoder04/arrowprint"
-	"github.com/alexcoder04/friendly"
+	"github.com/alexcoder04/friendly/v2"
+	"github.com/alexcoder04/friendly/v2/ffiles"
 )
 
 func LoadManifest(folder string) Manifest {
@@ -75,7 +76,8 @@ func Compile(folder string, manifest Manifest) {
 	}
 
 	arrowprint.Suc0("Running build script...")
-	err := friendly.Run(manifest.Build.Command, manifest.Build.Args, folder)
+	commandLine := []string{manifest.Build.Command}
+	err := friendly.Run(append(commandLine, manifest.Build.Args...), folder)
 	if err != nil {
 		arrowprint.Err0("build script failed")
 		os.Exit(1)
@@ -101,12 +103,16 @@ func PreparePackage(folder string, buildFolder string, manifest Manifest) {
 	}
 	for i, d := range manifest.Build.Dlls {
 		arrowprint.Info1("%d. %s...", i+1, d)
-		friendly.CopyFile(
+		err := ffiles.CopyFile(
 			path.Join(folder, "bin", "Debug", "net6.0", d),
 			path.Join(buildFolder, "plugins", d))
+		if err != nil {
+			arrowprint.Err0("error copying files")
+			os.Exit(1)
+		}
 	}
 	arrowprint.Suc0("Copying share files to build folder...")
-	err = friendly.CopyFolder(
+	err = ffiles.CopyFolder(
 		path.Join(folder, manifest.Build.Share),
 		path.Join(buildFolder, "share"))
 	if err != nil {
@@ -146,8 +152,7 @@ func copyLicense(folder string, buildFolder string, pkgname string) error {
 		if !stat.IsDir() {
 			return errors.New("docs folder exists, but is not a folder")
 		}
-		friendly.CopyFile(path.Join(folder, f), path.Join(docsFolder, "LICENSE"))
-		break
+		return ffiles.CopyFile(path.Join(folder, f), path.Join(docsFolder, "LICENSE"))
 	}
 	return nil
 }
@@ -161,7 +166,7 @@ func GenPkgInfo(buildFolder string, manifest Manifest) {
 	pkginfo.PackageOS = GetPackageOS()
 	pkginfo.CompatibleVersions = manifest.CompatibleVersions
 	pkginfo.Depends = manifest.Depends
-	files, err := friendly.ListFilesRecursively(buildFolder)
+	files, err := ffiles.ListFilesRecursively(buildFolder)
 	if err != nil {
 		arrowprint.Err0("cannot files files in build folder")
 		os.Exit(1)
